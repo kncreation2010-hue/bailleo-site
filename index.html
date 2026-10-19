@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="fr-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#2D6A4F">
+<title>Bailleo</title>
+<meta name="description" content="Bailleo : loyers, quittances, décomptes de charges et ajustements au taux de référence pour les bailleurs privés de Suisse romande.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bitter:wght@500;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: une seule colonne lisible comme un registre de loyers ; bandes pleine largeur, contenu limité à 1040px, deux colonnes dès 820px. */
+:root{
+  --paper:#F4F6F1;
+  --sheet:#FFFFFF;
+  --ink:#16201C;
+  --muted:#55625C;
+  --line:#D6DDD6;
+  --pine:#2D6A4F;
+  --pine-ink:#FFFFFF;
+  --bvr:#F3A77C;
+  --bvr-soft:#FCE6D8;
+  --late:#B4442E;
+  --ok:#2D6A4F;
+  --ok-soft:#DCEDE3;
+  --late-soft:#F8E0DA;
+  --f-display:"Bitter", Georgia, "Times New Roman", serif;
+  --f-body:"Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono:"IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --s-1:.875rem; --s0:1rem; --s1:1.125rem; --s2:1.375rem; --s3:1.75rem; --s4:2.25rem; --s5:clamp(2.25rem, 7vw, 3.5rem);
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#111815; --sheet:#18211D; --ink:#E7EEE9; --muted:#9EADA5; --line:#2C3833;
+    --pine:#6FBF96; --pine-ink:#0E1512; --bvr:#F0A276; --bvr-soft:#3A2A20;
+    --late:#F08C74; --ok:#7FCFA4; --ok-soft:#1F3328; --late-soft:#3A221C;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#111815; --sheet:#18211D; --ink:#E7EEE9; --muted:#9EADA5; --line:#2C3833;
+  --pine:#6FBF96; --pine-ink:#0E1512; --bvr:#F0A276; --bvr-soft:#3A2A20;
+  --late:#F08C74; --ok:#7FCFA4; --ok-soft:#1F3328; --late-soft:#3A221C;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:var(--s1);line-height:1.6;-webkit-text-size-adjust:100%}
+.wrap{max-width:1040px;margin:0 auto;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+h1,h2,h3{font-family:var(--f-display);line-height:1.15;margin:0;text-wrap:balance;letter-spacing:-.01em}
+h1{font-size:var(--s5);font-weight:800}
+h2{font-size:var(--s4);font-weight:700}
+h3{font-size:var(--s2);font-weight:700}
+p{margin:0}
+a{color:var(--pine)}
+:focus-visible{outline:3px solid var(--bvr);outline-offset:2px;border-radius:4px}
+.eyebrow{font-family:var(--f-mono);font-size:var(--s-1);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+
+/* Header */
+.top{border-bottom:1px solid var(--line);background:var(--paper)}
+.top .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:14px}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--f-display);font-weight:800;font-size:var(--s2);color:var(--ink);text-decoration:none}
+.brand svg{flex:none}
+.soon{font-family:var(--f-mono);font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;background:var(--bvr-soft);color:var(--ink);border:1px solid var(--bvr);padding:2px 8px;border-radius:999px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font:700 var(--s0)/1 var(--f-body);padding:14px 20px;border-radius:var(--r);border:2px solid var(--pine);background:var(--pine);color:var(--pine-ink);text-decoration:none;cursor:pointer;min-height:48px}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent;color:var(--pine)}
+.btn.small{padding:10px 14px;min-height:40px;font-size:var(--s-1)}
+
+/* Hero */
+.hero .wrap{display:grid;gap:36px;padding-block:44px 56px}
+.hero-copy{display:grid;gap:20px;align-content:start;min-width:0}
+.lede{font-size:var(--s2);color:var(--muted);max-width:34ch;line-height:1.45}
+.ctas{display:flex;flex-wrap:wrap;gap:12px}
+.fineprint{font-size:var(--s-1);color:var(--muted)}
+
+/* Registre d'exemple */
+.ledger{background:var(--sheet);border:1px solid var(--line);border-radius:14px;box-shadow:0 1px 0 var(--line),0 18px 40px -24px rgba(22,32,28,.35);overflow:hidden;min-width:0}
+.ledger-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:16px 18px;border-bottom:1px solid var(--line)}
+.ledger-head strong{font-family:var(--f-display);font-size:var(--s1)}
+.tag{font-family:var(--f-mono);font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border:1px dashed var(--line);padding:2px 6px;border-radius:4px}
+.rows{list-style:none;margin:0;padding:0}
+.rows li{display:grid;grid-template-columns:1fr auto;gap:4px 12px;padding:14px 18px;border-bottom:1px solid var(--line)}
+.rows li:last-child{border-bottom:0}
+.rows .who{font-weight:700;min-width:0}
+.rows .where{font-size:var(--s-1);color:var(--muted);grid-column:1}
+.rows .amt{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabular-nums;font-size:var(--s0)}
+.pill{justify-self:end;grid-column:2;grid-row:2;font-size:.78rem;font-weight:700;padding:2px 10px;border-radius:999px;white-space:nowrap}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}
+.pill.late{background:var(--late-soft);color:var(--late)}
+.ledger-foot{display:flex;justify-content:space-between;gap:12px;padding:14px 18px;background:var(--paper);border-top:1px dashed var(--line);font-size:var(--s-1)}
+.ledger-foot .num{font-weight:500}
+.scissors{display:flex;align-items:center;gap:8px;color:var(--muted);font-family:var(--f-mono);font-size:.72rem;padding:0 18px 12px;background:var(--paper)}
+.scissors::after{content:"";flex:1;border-top:1px dashed var(--muted);opacity:.6}
+
+/* Bande taux de référence */
+.band{background:var(--bvr-soft);border-block:1px solid var(--bvr)}
+.band .wrap{display:grid;gap:28px;padding-block:48px}
+.rate-copy{display:grid;gap:14px;align-content:start;min-width:0}
+.rate-copy p{max-width:52ch}
+.big-rate{font-family:var(--f-display);font-weight:800;font-size:clamp(3.5rem, 14vw, 5.5rem);line-height:1;color:var(--ink)}
+.big-rate small{font-size:.35em;font-weight:700;color:var(--muted);margin-left:6px}
+.calc{background:var(--sheet);border:1px solid var(--line);border-radius:14px;padding:20px;display:grid;gap:16px;min-width:0}
+.field{display:grid;gap:6px}
+.field label{font-weight:700;font-size:var(--s0)}
+.field .hint{font-size:var(--s-1);color:var(--muted)}
+input,select{font:inherit;font-size:var(--s1);color:var(--ink);background:var(--paper);border:1.5px solid var(--line);border-radius:8px;padding:12px;min-height:48px;width:100%}
+input:focus,select:focus{border-color:var(--pine);outline:none;box-shadow:0 0 0 3px var(--ok-soft)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.result{border-top:1px dashed var(--line);padding-top:14px;display:grid;gap:6px}
+.result .out{font-family:var(--f-display);font-size:var(--s3);font-weight:800}
+.result .out.down{color:var(--late)}
+.result .out.up{color:var(--ok)}
+.result p{font-size:var(--s-1);color:var(--muted)}
+
+/* Fonctions */
+.section .wrap{display:grid;gap:28px;padding-block:56px}
+.section-head{display:grid;gap:10px;max-width:60ch}
+.features{display:grid;gap:0;border-top:1px solid var(--line)}
+.feature{display:grid;grid-template-columns:44px 1fr;gap:4px 16px;padding:22px 0;border-bottom:1px solid var(--line)}
+.feature svg{grid-row:span 2;color:var(--pine)}
+.feature p{color:var(--muted);max-width:52ch}
+
+/* Prix */
+.plans{display:grid;gap:16px}
+.plan{background:var(--sheet);border:1px solid var(--line);border-radius:14px;padding:22px;display:grid;gap:10px;align-content:start}
+.plan .price{font-family:var(--f-display);font-weight:800;font-size:var(--s4)}
+.plan .price span{font-family:var(--f-body);font-size:var(--s0);font-weight:400;color:var(--muted)}
+.plan ul{margin:0;padding-left:1.1em;color:var(--muted);display:grid;gap:4px}
+.plan.founder{border:2px solid var(--bvr);background:var(--bvr-soft)}
+.plan.founder .eyebrow{color:var(--ink)}
+
+/* Formulaire */
+.signup{background:var(--sheet);border-top:1px solid var(--line)}
+.signup .wrap{display:grid;gap:24px;padding-block:56px}
+form{display:grid;gap:18px;max-width:560px}
+.check{display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start;background:var(--bvr-soft);border:1px solid var(--bvr);border-radius:10px;padding:14px}
+.check input{width:24px;height:24px;min-height:0;margin:2px 0 0;accent-color:var(--pine)}
+.check label{font-weight:400}
+.status{border-radius:10px;padding:14px 16px;font-size:var(--s0)}
+.status.ok{background:var(--ok-soft);color:var(--ink);border:1px solid var(--ok)}
+.status.err{background:var(--late-soft);color:var(--ink);border:1px solid var(--late)}
+
+/* FAQ */
+details{border-bottom:1px solid var(--line);padding:16px 0}
+summary{font-weight:700;cursor:pointer;font-size:var(--s1)}
+details p{margin-top:8px;color:var(--muted);max-width:60ch}
+footer{border-top:1px solid var(--line)}
+footer .wrap{padding-block:28px;display:grid;gap:8px;font-size:var(--s-1);color:var(--muted)}
+
+@media (min-width:820px){
+  .hero .wrap{grid-template-columns:1.1fr .9fr;align-items:center;padding-block:72px 80px}
+  .band .wrap{grid-template-columns:1fr 1fr;align-items:start}
+  .features{grid-template-columns:1fr 1fr;column-gap:40px}
+  .plans{grid-template-columns:repeat(3,1fr)}
+  .signup .wrap{grid-template-columns:.9fr 1.1fr}
+}
+@media (prefers-reduced-motion:no-preference){
+  .ledger{animation:rise .6s ease-out both}
+  @keyframes rise{from{transform:translateY(10px)}to{transform:none}}
+}
+</style>
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="Bailleo">
+      <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><rect x="2" y="2" width="26" height="26" rx="7" fill="var(--pine)"/><path d="M9 21V12l6-4 6 4v9h-4v-5h-4v5z" fill="var(--pine-ink)"/></svg>
+      Bailleo
+    </a>
+    <span class="soon">En préparation</span>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero">
+    <div class="wrap">
+      <div class="hero-copy">
+        <p class="eyebrow">Pour les bailleurs privés de Suisse romande</p>
+        <h1>Vos loyers, sans le classeur.</h1>
+        <p class="lede">Voyez qui a payé, envoyez un rappel, sortez une quittance et calculez un ajustement de loyer. Tout depuis votre téléphone.</p>
+        <div class="ctas">
+          <a class="btn" href="#inscription">Réserver le prix fondateur</a>
+          <a class="btn ghost" href="#taux">Tester le calcul du taux</a>
+        </div>
+        <p class="fineprint">Pensé pour 1 à 10 logements. Gratuit pour un logement.</p>
+      </div>
+
+      <figure class="ledger" aria-label="Exemple d'écran : loyers du mois">
+        <div class="ledger-head">
+          <strong>Loyers · novembre</strong>
+          <span class="tag">Exemple</span>
+        </div>
+        <ul class="rows">
+          <li><span class="who">M. et Mme Rochat</span><span class="amt">1’850.00</span><span class="where">3,5 pces · Rue du Simplon, Vevey</span><span class="pill ok">Payé le 28.10</span></li>
+          <li><span class="who">S. Duarte</span><span class="amt">1’290.00</span><span class="where">2 pces · Av. de la Gare, Morges</span><span class="pill late">Retard 6 jours</span></li>
+          <li><span class="who">L. Meier</span><span class="amt">980.00</span><span class="where">Studio · Ch. des Vignes, Vevey</span><span class="pill ok">Payé le 01.11</span></li>
+        </ul>
+        <div class="ledger-foot"><span>Encaissé</span><span class="num">2’830.00 / 4’120.00 CHF</span></div>
+        <div class="scissors" aria-hidden="true">✂ Quittance prête</div>
+      </figure>
+    </div>
+  </section>
+
+  <section class="band" id="taux">
+    <div class="wrap">
+      <div class="rate-copy">
+        <p class="eyebrow">Taux hypothécaire de référence</p>
+        <div class="big-rate">1,25<small>%</small></div>
+        <p>Le taux publié par l'Office fédéral du logement est inchangé depuis septembre 2025. Si le bail a été conclu à un taux plus élevé, votre locataire peut demander une baisse. Bailleo vous prévient à chaque publication et prépare le calcul.</p>
+      </div>
+      <div class="calc" aria-labelledby="calc-title">
+        <h3 id="calc-title">Estimer l'effet sur un loyer</h3>
+        <div class="field">
+          <label for="rent">Loyer net actuel (CHF / mois)</label>
+          <input id="rent" type="number" inputmode="decimal" min="0" step="10" value="1650">
+        </div>
+        <div class="two">
+          <div class="field">
+            <label for="from">Taux du bail</label>
+            <select id="from"></select>
+          </div>
+          <div class="field">
+            <label for="to">Taux actuel</label>
+            <select id="to"></select>
+          </div>
+        </div>
+        <div class="result" aria-live="polite">
+          <span class="eyebrow" id="res-label">Baisse que le locataire peut demander</span>
+          <span class="out down num" id="res-out">−93.40 CHF / mois</span>
+          <p id="res-detail">Soit −5,66 % sur la seule part liée au taux.</p>
+          <p>Estimation simplifiée (taux sous 5 % : 3 % par quart de point). Le calcul complet tient aussi compte du renchérissement (IPC) et des coûts d'entretien. Ne remplace pas un conseil juridique.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="fonctions">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Ce que fera l'application</p>
+        <h2>Le suivi d'une petite régie, sans la régie.</h2>
+      </div>
+      <div class="features">
+        <div class="feature">
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="5" y="6" width="22" height="21" rx="3"/><path d="M5 12h22M11 3v6M21 3v6M11 18l3 3 6-6"/></svg>
+          <h3>Loyers du mois</h3>
+          <p>Chaque logement, son loyer, ses charges et son statut. Un rappel poli prêt à envoyer dès qu'un paiement a du retard.</p>
+        </div>
+        <div class="feature">
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M8 3h11l6 6v20H8z"/><path d="M19 3v6h6M12 16h9M12 21h9"/></svg>
+          <h3>Quittances et attestations</h3>
+          <p>Quittance mensuelle ou attestation annuelle en PDF, à vos coordonnées, envoyée en deux gestes.</p>
+        </div>
+        <div class="feature">
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 27V13M13 27V7M20 27V16M27 27V10"/></svg>
+          <h3>Décompte de charges</h3>
+          <p>Acomptes encaissés contre frais réels de chauffage, d'eau et de conciergerie. Le solde dû ou à rembourser, calculé pour chaque locataire.</p>
+        </div>
+        <div class="feature">
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="16" cy="16" r="11"/><path d="M16 9v7l5 3"/></svg>
+          <h3>Ajustements et échéances</h3>
+          <p>Taux de référence, échéances de résiliation, fin de bail et garantie de loyer. Bailleo vous rappelle les dates qui comptent.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="prix">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Prix prévus</p>
+        <h2>Moins qu'un mois de frais de régie par an.</h2>
+      </div>
+      <div class="plans">
+        <div class="plan">
+          <p class="eyebrow">Découverte</p>
+          <p class="price">0 CHF</p>
+          <ul><li>1 logement</li><li>Suivi des loyers</li><li>Calcul du taux de référence</li></ul>
+        </div>
+        <div class="plan">
+          <p class="eyebrow">Pro</p>
+          <p class="price num">12 CHF <span>/ mois</span></p>
+          <ul><li>Logements illimités</li><li>Quittances et décomptes PDF</li><li>Rappels et échéances</li><li>Ou 120 CHF par an</li></ul>
+        </div>
+        <div class="plan founder">
+          <p class="eyebrow">Prix fondateur · 50 places</p>
+          <p class="price num">60 CHF <span>/ an</span></p>
+          <ul><li>Tout le plan Pro</li><li>Prix garanti tant que vous restez abonné</li><li>Vous orientez les prochaines fonctions</li></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="signup" id="inscription">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Liste d'attente</p>
+        <h2>Prévenez-moi au lancement.</h2>
+        <p class="fineprint">Aucun paiement maintenant. Votre adresse sert uniquement à vous annoncer le lancement, et vous pouvez demander sa suppression à tout moment.</p>
+      </div>
+      <form id="form" novalidate>
+        <div class="field">
+          <label for="email">Adresse e-mail</label>
+          <input id="email" name="email" type="email" autocomplete="email" placeholder="prenom@exemple.ch" required>
+        </div>
+        <div class="two">
+          <div class="field">
+            <label for="units">Logements loués</label>
+            <select id="units" name="logements">
+              <option value="1">1</option>
+              <option value="2-3" selected>2 à 3</option>
+              <option value="4-10">4 à 10</option>
+              <option value="10+">Plus de 10</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="canton">Canton</label>
+            <select id="canton" name="canton">
+              <option>VD</option><option>GE</option><option>FR</option><option>NE</option><option>VS</option><option>JU</option><option>BE</option><option>Autre</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label for="today">Aujourd'hui, vous gérez avec…</label>
+          <select id="today" name="outil_actuel">
+            <option>Un tableau Excel</option>
+            <option>Du papier et des classeurs</option>
+            <option>Ma banque et ma mémoire</option>
+            <option>Une régie</option>
+            <option>Une autre application</option>
+          </select>
+        </div>
+        <div class="check">
+          <input id="founder" name="prix_fondateur" type="checkbox" value="oui" checked>
+          <label for="founder">Je veux réserver le <strong>prix fondateur à 60 CHF par an</strong>. Je déciderai au lancement, sans engagement.</label>
+        </div>
+        <div class="field">
+          <label for="pain">Ce qui vous prend le plus de temps (facultatif)</label>
+          <input id="pain" name="probleme" type="text" placeholder="Par ex. le décompte de chauffage">
+        </div>
+        <button class="btn" type="submit" id="submit">M'inscrire à la liste</button>
+        <div id="status" class="status" role="status" hidden></div>
+      </form>
+    </div>
+  </section>
+
+  <section class="section" id="faq">
+    <div class="wrap">
+      <div class="section-head"><h2>Questions</h2></div>
+      <div>
+        <details><summary>Quand l'application sera-t-elle disponible ?</summary><p>Bailleo est en préparation. Les inscrits seront les premiers à la tester, d'abord dans le navigateur de leur téléphone, puis sur l'App Store.</p></details>
+        <details><summary>Où sont mes données ?</summary><p>Vos données restent les vôtres. Elles ne sont ni vendues ni partagées, et vous pourrez les exporter ou les supprimer à tout moment.</p></details>
+        <details><summary>Est-ce que Bailleo remplace une régie ?</summary><p>Non. Bailleo aide les propriétaires qui gèrent eux-mêmes. Il ne représente pas le bailleur et ne donne pas de conseil juridique.</p></details>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>Bailleo · projet en préparation en Suisse romande. Aucune application n'est encore disponible.</p>
+    <p>Taux de référence : source Office fédéral du logement (OFL).</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  // Adresse du service qui reçoit les inscriptions. Vide = mode aperçu.
+  var FORM_ENDPOINT = "";
+
+  // Calcul simplifié de l'effet du taux de référence (taux < 5 % : 3 % par quart de point).
+  // Hausse : +3 % par quart de point. Baisse : 1 - 1/(1 + 0.03 x quarts de point).
+  var rates = [];
+  for (var r = 1.25; r <= 3.5001; r += 0.25) rates.push(Math.round(r*100)/100);
+  var fromEl = document.getElementById('from'), toEl = document.getElementById('to'), rentEl = document.getElementById('rent');
+  function fmtRate(x){ return x.toFixed(2).replace('.', ',') + ' %'; }
+  rates.forEach(function(x){
+    var a = document.createElement('option'); a.value = x; a.textContent = fmtRate(x); if (x === 1.75) a.selected = true; fromEl.appendChild(a);
+    var b = document.createElement('option'); b.value = x; b.textContent = fmtRate(x); if (x === 1.25) b.selected = true; toEl.appendChild(b);
+  });
+  function chf(n){
+    var s = Math.abs(n).toFixed(2).split('.');
+    s[0] = s[0].replace(/\B(?=(\d{3})+(?!\d))/g, '’');
+    return s.join('.');
+  }
+  function pct(n){ return (Math.abs(n)*100).toFixed(2).replace('.', ','); }
+  function compute(rent, from, to){
+    var steps = Math.round((to - from) / 0.25);
+    if (steps === 0) return { steps: 0, change: 0, ratio: 0 };
+    var ratio = steps > 0 ? 0.03 * steps : (1 / (1 + 0.03 * -steps)) - 1;
+    return { steps: steps, change: rent * ratio, ratio: ratio };
+  }
+  window.__bailleoCompute = compute;
+  function update(){
+    var rent = parseFloat(rentEl.value) || 0, res = compute(rent, parseFloat(fromEl.value), parseFloat(toEl.value));
+    var label = document.getElementById('res-label'), out = document.getElementById('res-out'), det = document.getElementById('res-detail');
+    if (res.steps === 0){
+      label.textContent = 'Effet du taux de référence'; out.className = 'out num'; out.textContent = 'Aucun changement';
+      det.textContent = 'Le taux du bail est égal au taux actuel.';
+    } else if (res.steps < 0){
+      label.textContent = 'Baisse que le locataire peut demander'; out.className = 'out down num';
+      out.textContent = '−' + chf(res.change) + ' CHF / mois';
+      det.textContent = 'Soit −' + pct(res.ratio) + ' % sur la seule part liée au taux.';
+    } else {
+      label.textContent = 'Hausse que vous pouvez justifier'; out.className = 'out up num';
+      out.textContent = '+' + chf(res.change) + ' CHF / mois';
+      det.textContent = 'Soit +' + pct(res.ratio) + ' % sur la seule part liée au taux, avec la formule officielle et les délais.';
+    }
+  }
+  [rentEl, fromEl, toEl].forEach(function(el){ el.addEventListener('input', update); el.addEventListener('change', update); });
+  update();
+
+  // Formulaire d'inscription
+  var form = document.getElementById('form'), status = document.getElementById('status'), btn = document.getElementById('submit');
+  function show(kind, msg){ status.className = 'status ' + kind; status.textContent = msg; status.hidden = false; }
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    var email = document.getElementById('email');
+    if (!email.value || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)){
+      show('err', 'Indiquez une adresse e-mail complète, par exemple prenom@exemple.ch.'); email.focus(); return;
+    }
+    var data = {};
+    new FormData(form).forEach(function(v, k){ data[k] = v; });
+    if (!data.prix_fondateur) data.prix_fondateur = 'non';
+    data._subject = 'Bailleo : nouvelle inscription';
+    if (!FORM_ENDPOINT){
+      show('ok', 'Aperçu : le formulaire fonctionne, mais il n’est pas encore relié à une boîte de réception. Les inscriptions seront reçues une fois la page en ligne.');
+      return;
+    }
+    btn.disabled = true; btn.textContent = 'Envoi…';
+    fetch(FORM_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify(data) })
+      .then(function(r){ if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function(){ form.reset(); show('ok', 'Merci, vous êtes inscrit. Vous recevrez un e-mail au lancement.'); })
+      .catch(function(){ show('err', 'L’inscription n’est pas passée. Vérifiez votre connexion et réessayez dans un instant.'); })
+      .finally(function(){ btn.disabled = false; btn.textContent = 'M’inscrire à la liste'; });
+  });
+})();
+</script>
+
+</body>
+</html>
