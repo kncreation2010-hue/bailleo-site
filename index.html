@@ -371,7 +371,8 @@ footer .wrap{padding-block:28px;display:grid;gap:8px;font-size:var(--s-1);color:
 <script>
 (function(){
   // Adresse du service qui reçoit les inscriptions. Vide = mode aperçu.
-  var FORM_ENDPOINT = "https://formsubmit.co/ajax/bailleo2026@gmail.com";
+  var FORM_ENDPOINT = "https://docs.google.com/forms/d/e/1FAIpQLSeWhLHFbJxVILVQgS2OwTqtYU3RfctZQso9Qs0BBsJB--YTwQ/formResponse";
+  var FORM_FIELD = "entry.1841809609";
 
   // Calcul simplifié de l'effet du taux de référence (taux < 5 % : 3 % par quart de point).
   // Hausse : +3 % par quart de point. Baisse : 1 - 1/(1 + 0.03 x quarts de point).
@@ -427,19 +428,28 @@ footer .wrap{padding-block:28px;display:grid;gap:8px;font-size:var(--s-1);color:
     var data = {};
     new FormData(form).forEach(function(v, k){ data[k] = v; });
     if (!data.prix_fondateur) data.prix_fondateur = 'non';
-    data._subject = 'Bailleo : nouvelle inscription';
-    data._template = 'table';
     if (data._honey) return;
     if (!FORM_ENDPOINT){
       show('ok', 'Aperçu : le formulaire fonctionne, mais il n’est pas encore relié à une boîte de réception. Les inscriptions seront reçues une fois la page en ligne.');
       return;
     }
     btn.disabled = true; btn.textContent = 'Envoi…';
-    fetch(FORM_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify(data) })
-      .then(function(r){ if (!r.ok) throw new Error(r.status); return r.json(); })
-      .then(function(res){ if (res && (res.success === false || res.success === 'false')) throw new Error('not_active'); form.reset(); show('ok', 'Merci, vous êtes inscrit. Vous recevrez un e-mail au lancement.'); })
-      .catch(function(){ show('err', 'L’inscription n’est pas passée. Vérifiez votre connexion et réessayez dans un instant.'); })
-      .finally(function(){ btn.disabled = false; btn.textContent = 'M’inscrire à la liste'; });
+    var text = [
+      'E-mail : ' + data.email,
+      'Logements : ' + data.logements,
+      'Canton : ' + data.canton,
+      'Outil actuel : ' + data.outil_actuel,
+      'Prix fondateur : ' + data.prix_fondateur,
+      'Problème : ' + (data.probleme || '-'),
+      'Date : ' + new Date().toLocaleString('fr-CH')
+    ].join('\n');
+    var body = new URLSearchParams();
+    body.append(FORM_FIELD, text);
+    // Google Forms ne renvoie pas de réponse lisible (mode no-cors) : seule une erreur réseau signale un échec.
+    fetch(FORM_ENDPOINT, { method: 'POST', mode: 'no-cors', body: body })
+      .then(function(){ form.reset(); show('ok', 'Merci, vous êtes inscrit. Vous recevrez un e-mail au lancement.'); })
+      .catch(function(){ show('err', 'L\u2019inscription n\u2019est pas passée. Vérifiez votre connexion et réessayez dans un instant.'); })
+      .finally(function(){ btn.disabled = false; btn.textContent = 'M\u2019inscrire à la liste'; });
   });
 })();
 </script>
